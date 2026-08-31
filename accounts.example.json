@@ -1,0 +1,18 @@
+{
+  "accounts": [
+    {
+      "label": "Account 1 - Self",
+      "mobile_number": "+9198XXXXXXXX",
+      "password": "your_login_password",
+      "mpin": "1234",
+      "totp_secret": ""
+    },
+    {
+      "label": "Account 2 - Spouse",
+      "mobile_number": "+9197XXXXXXXX",
+      "password": "your_login_password",
+      "mpin": "5678",
+      "totp_secret": ""
+    }
+  ]
+}

@@ -5,6 +5,7 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 import pandas as pd
 import streamlit as st
+
 from config.settings import CONSUMER_KEY, CONSUMER_SECRET, KOTAK_ENV, load_accounts
 from core.order_engine import build_sessions, login_all, place_order_all
 
@@ -72,15 +73,15 @@ if st.button("🚀 Place order in all accounts", disabled=not confirm):
     elif not trading_symbol:
         st.error("Enter a trading symbol.")
     else:
-        order_params = dict(
-            exchange_segment=exchange_segment,
-            trading_symbol=trading_symbol,
-            transaction_type=transaction_type,
-            quantity=quantity,
-            order_type=order_type,
-            product=product,
-            price=price,
-        )
+        order_params = {
+            "exchange_segment": exchange_segment,
+            "trading_symbol": trading_symbol,
+            "transaction_type": transaction_type,
+            "quantity": quantity,
+            "order_type": order_type,
+            "product": product,
+            "price": price,
+        }
         with st.spinner("Placing orders across accounts..."):
             results = place_order_all(st.session_state.sessions, order_params)
 

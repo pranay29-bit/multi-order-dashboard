@@ -1,4 +1,4 @@
-"""Encrypted, server-side storage for Kotak credentials in Cloud Firestore."""
+"""Encrypted, server-side storage for Kotak credentials in Firebase Cloud Firestore."""
 
 import json
 import os
@@ -19,6 +19,7 @@ class FirebaseCredentialVault:
     def __init__(self) -> None:
         service_account = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
         encryption_key = os.getenv("CREDENTIAL_VAULT_KEY")
+
         if not service_account or not encryption_key:
             raise CredentialVaultError(
                 "Set FIREBASE_SERVICE_ACCOUNT_JSON and CREDENTIAL_VAULT_KEY on the server."
@@ -32,12 +33,17 @@ class FirebaseCredentialVault:
                     credentials.Certificate(json.loads(service_account))
                 )
             except (TypeError, ValueError) as error:
-                raise CredentialVaultError("FIREBASE_SERVICE_ACCOUNT_JSON is not valid.") from error
+                raise CredentialVaultError(
+                    "FIREBASE_SERVICE_ACCOUNT_JSON is not valid."
+                ) from error
 
         try:
             self._cipher = Fernet(encryption_key.encode())
         except (TypeError, ValueError) as error:
-            raise CredentialVaultError("CREDENTIAL_VAULT_KEY is not a valid Fernet key.") from error
+            raise CredentialVaultError(
+                "CREDENTIAL_VAULT_KEY is not a valid Fernet key."
+            ) from error
+
         self._db = firestore.client(app)
 
     def _encrypt(self, payload: dict[str, Any]) -> str:
@@ -47,9 +53,16 @@ class FirebaseCredentialVault:
         try:
             return json.loads(self._cipher.decrypt(encrypted_payload.encode()).decode())
         except (InvalidToken, TypeError, ValueError, json.JSONDecodeError) as error:
-            raise CredentialVaultError("Stored credential data cannot be decrypted.") from error
+            raise CredentialVaultError(
+                "Stored credential data cannot be decrypted."
+            ) from error
 
-    def save_application(self, consumer_key: str, consumer_secret: str, environment: str) -> None:
+    def save_application(
+        self,
+        consumer_key: str,
+        consumer_secret: str,
+        environment: str,
+    ) -> None:
         self._db.collection("credential_vault").document("kotak_application").set(
             {
                 "payload": self._encrypt(
@@ -65,7 +78,10 @@ class FirebaseCredentialVault:
     def save_account(self, account: dict[str, str]) -> str:
         document = self._db.collection("credential_vault").document()
         document.set(
-            {"payload": self._encrypt(account), "created_at": firestore.SERVER_TIMESTAMP}
+            {
+                "payload": self._encrypt(account),
+                "created_at": firestore.SERVER_TIMESTAMP,
+            }
         )
         return document.id
 
@@ -73,12 +89,17 @@ class FirebaseCredentialVault:
         application = self._db.collection("credential_vault").document(
             "kotak_application"
         ).get()
+
         if not application.exists:
-            raise CredentialVaultError("No Kotak application credentials have been saved yet.")
+            raise CredentialVaultError(
+                "No Kotak application credentials have been saved yet."
+            )
 
         app_payload = self._decrypt(application.to_dict()["payload"])
         accounts = []
+
         for document in self._db.collection("credential_vault").stream():
             if document.id != "kotak_application":
                 accounts.append(self._decrypt(document.to_dict()["payload"]))
+
         return app_payload, accounts

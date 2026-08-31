@@ -7,12 +7,15 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
 
-from core.credential_vault import CredentialVaultError, FirebaseCredentialVault
+from core.firebase_credential_vault import CredentialVaultError, FirebaseCredentialVault
 
 
 st.set_page_config(page_title="Credential Vault", layout="centered")
 st.title("Credential vault")
-st.warning("Use this page only on a private, access-controlled Streamlit deployment. Never host it on GitHub Pages.")
+st.warning(
+    "Use this page only on a private, access-controlled Streamlit deployment. "
+    "Never host it on GitHub Pages."
+)
 
 access_password = os.getenv("VAULT_ACCESS_PASSWORD")
 if not access_password:
@@ -42,6 +45,7 @@ with st.form("application_credentials"):
     consumer_secret = st.text_input("Consumer secret", type="password")
     environment = st.selectbox("Environment", ["prod", "uat"])
     save_application = st.form_submit_button("Save application credentials")
+
     if save_application:
         if not consumer_key or not consumer_secret:
             st.error("Consumer key and consumer secret are required.")
@@ -57,6 +61,7 @@ with st.form("account_credentials", clear_on_submit=True):
     mpin = st.text_input("MPIN", type="password")
     totp_secret = st.text_input("TOTP secret (optional)", type="password")
     save_account = st.form_submit_button("Save account")
+
     if save_account:
         if not all([label, mobile_number, password, mpin]):
             st.error("Label, mobile number, password, and MPIN are required.")

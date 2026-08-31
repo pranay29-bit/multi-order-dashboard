@@ -1,5 +1,5 @@
 """
-Thin wrapper around the official `neo-api-client` SDK for a single Kotak account.
+Thin wrapper around the official Kotak Neo API v2 SDK for a single Kotak account.
 
 Notes:
 - The exact method names on NeoAPI have shifted slightly across SDK versions.
@@ -10,7 +10,7 @@ Notes:
 """
 
 from dataclasses import dataclass
-from typing import Optional
+
 import pyotp
 
 try:
@@ -25,7 +25,7 @@ class AccountCredentials:
     mobile_number: str
     password: str
     mpin: str
-    totp_secret: Optional[str] = ""
+    totp_secret: str | None = ""
 
 
 class KotakAccountSession:
@@ -36,13 +36,13 @@ class KotakAccountSession:
         self.consumer_secret = consumer_secret
         self.env = env
         self.creds = creds
-        self.client: Optional["NeoAPI"] = None
+        self.client: object | None = None
         self.logged_in = False
         self.last_error = None
 
     def login(self) -> bool:
         if NeoAPI is None:
-            self.last_error = "neo-api-client not installed. Run: pip install neo-api-client"
+            self.last_error = "Kotak Neo SDK not installed. Run: pip install -r requirements.txt"
             return False
         try:
             self.client = NeoAPI(
@@ -64,7 +64,7 @@ class KotakAccountSession:
 
             self.logged_in = True
             return True
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - external SDK exposes no stable error hierarchy
             self.last_error = str(e)
             self.logged_in = False
             return False
@@ -91,5 +91,5 @@ class KotakAccountSession:
                 transaction_type=transaction_type,
             )
             return {"success": True, "label": self.creds.label, "response": resp}
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - external SDK exposes no stable error hierarchy
             return {"success": False, "label": self.creds.label, "error": str(e)}

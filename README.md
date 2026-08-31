@@ -66,6 +66,17 @@ Run the dashboard:
 streamlit run app/dashboard.py
 ```
 
+## Firebase credential vault (optional)
+
+The included credential form is a **server-side Streamlit page**, not a GitHub Pages feature. It encrypts each credential payload before writing it to Cloud Firestore; the encryption key remains in your deployment's secrets.
+
+1. Create a Firebase project with Cloud Firestore enabled, then create a service account with only the Firestore permissions this app needs.
+2. Configure these as private deployment environment variables: `FIREBASE_SERVICE_ACCOUNT_JSON`, `CREDENTIAL_VAULT_KEY`, and `VAULT_ACCESS_PASSWORD`. Generate the encryption key with the command shown in `.env.example`.
+3. Set `KOTAK_CREDENTIAL_STORE=firebase` on the Streamlit server.
+4. Run `streamlit run app/credential_vault.py` from that private deployment to save the application and account credentials. Then run the dashboard normally.
+
+Do not put any of these values in GitHub Actions variables, repository files, GitHub Pages, or the browser's Firebase client configuration.
+
 ---
 
 ## 4. Using the dashboard

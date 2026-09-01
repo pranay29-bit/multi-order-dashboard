@@ -13,7 +13,7 @@ from core.brokers.base import BrokerSession
 
 try:
     from growwapi import GrowwAPI
-except exception:
+except Exception:
     GrowwAPI = None
 
 _PRODUCT_MAP = {"DELIVERY": "CNC", "INTRADAY": "MIS"}

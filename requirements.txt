@@ -1,4 +1,6 @@
 streamlit>=1.35.0
 git+https://github.com/Kotak-Neo/Kotak-neo-api-v2.git@v2.0.2#egg=neo_api_client
+kiteconnect>=5.0.0
+growwapi>=1.5.0
 pandas>=2.0.0
 pyotp>=2.9.0

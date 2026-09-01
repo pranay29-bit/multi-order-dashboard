@@ -1,6 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
-
-from core.kotak_client import AccountCredentials, KotakAccountSession
+from core.kotak_client import KotakAccountSession, AccountCredentials
 from core.logger_setup import get_logger
 
 logger = get_logger()
@@ -37,11 +36,6 @@ def login_all(sessions, max_workers=10):
 
 
 def place_order_all(sessions, order_params, max_workers=10):
-    """
-    order_params: dict with exchange_segment, trading_symbol, transaction_type,
-                  quantity, order_type, product, price
-    Fires the same order across every logged-in session in parallel.
-    """
     results = []
     logged_in_sessions = [s for s in sessions if s.logged_in]
 

@@ -2,7 +2,7 @@ from core.brokers.base import BrokerSession
 
 try:
     from kiteconnect import KiteConnect
-except ImportError:
+except Exception:
     KiteConnect = None
 
 _ORDER_TYPE_MAP = {"MARKET": "MARKET", "LIMIT": "LIMIT"}

@@ -3,7 +3,7 @@ from core.brokers.base import BrokerSession
 
 try:
     from neo_api_client import NeoAPI
-except ImportError:
+except Exception:
     NeoAPI = None
 
 _ORDER_TYPE_MAP = {"MARKET": "MKT", "LIMIT": "L"}

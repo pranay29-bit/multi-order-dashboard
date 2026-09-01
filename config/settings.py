@@ -1,41 +1,55 @@
 import json
-import os
 from pathlib import Path
 
-from dotenv import load_dotenv
-
-from core.credential_vault import FirebaseCredentialVault
-
 ROOT = Path(__file__).resolve().parent.parent
-load_dotenv(ROOT / ".env")
-
 ACCOUNTS_FILE = ROOT / "accounts.json"
+APP_CONFIG_FILE = ROOT / "app_config.json"
 
 
-def using_firebase_vault() -> bool:
-    return os.getenv("KOTAK_CREDENTIAL_STORE", "local").lower() == "firebase"
+def load_app_config() -> dict:
+    """Consumer key/secret/env, entered via the Settings tab on the site itself."""
+    if not APP_CONFIG_FILE.exists():
+        return {"consumer_key": "", "consumer_secret": "", "env": "prod"}
+    with open(APP_CONFIG_FILE) as f:
+        return json.load(f)
 
 
-def load_runtime_settings() -> tuple[str, str, str]:
-    if not using_firebase_vault():
-        return (
-            os.getenv("KOTAK_CONSUMER_KEY", ""),
-            os.getenv("KOTAK_CONSUMER_SECRET", ""),
-            os.getenv("KOTAK_ENV", "prod"),
-        )
-    application, _ = FirebaseCredentialVault().load_configuration()
-    return application["consumer_key"], application["consumer_secret"], application["environment"]
+def save_app_config(consumer_key: str, consumer_secret: str, env: str) -> None:
+    with open(APP_CONFIG_FILE, "w") as f:
+        json.dump({"consumer_key": consumer_key, "consumer_secret": consumer_secret, "env": env}, f, indent=2)
 
 
-def load_accounts():
-    if using_firebase_vault():
-        _, accounts = FirebaseCredentialVault().load_configuration()
-        return accounts
+def load_accounts() -> list[dict]:
     if not ACCOUNTS_FILE.exists():
-        raise FileNotFoundError(
-            "accounts.json not found. Copy accounts.example.json to accounts.json "
-            "and fill in your real per-account credentials."
-        )
+        return []
     with open(ACCOUNTS_FILE) as f:
         data = json.load(f)
     return data.get("accounts", [])
+
+
+def save_accounts(accounts: list[dict]) -> None:
+    with open(ACCOUNTS_FILE, "w") as f:
+        json.dump({"accounts": accounts}, f, indent=2)
+
+
+def add_account(account: dict) -> None:
+    accounts = load_accounts()
+    if any(a["label"] == account["label"] for a in accounts):
+        raise ValueError(f"An account labeled '{account['label']}' already exists.")
+    accounts.append(account)
+    save_accounts(accounts)
+
+
+def update_account(label: str, updated: dict) -> None:
+    accounts = load_accounts()
+    for i, a in enumerate(accounts):
+        if a["label"] == label:
+            accounts[i] = updated
+            save_accounts(accounts)
+            return
+    raise ValueError(f"No account labeled '{label}' found.")
+
+
+def delete_account(label: str) -> None:
+    accounts = [a for a in load_accounts() if a["label"] != label]
+    save_accounts(accounts)

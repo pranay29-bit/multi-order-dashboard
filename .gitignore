@@ -1,8 +1,8 @@
 accounts.json
+app_config.json
 .env
 venv/
 __pycache__/
 *.pyc
 logs/*.log
-.streamlit/secrets.toml
 .DS_Store

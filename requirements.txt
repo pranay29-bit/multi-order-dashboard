@@ -1,6 +1,11 @@
 streamlit>=1.35.0
 git+https://github.com/Kotak-Neo/Kotak-neo-api-v2.git@v2.0.2#egg=neo_api_client
 kiteconnect>=5.0.0
-growwapi>=1.5.0
+# growwapi removed: it requires certifi>=2025.1.31, but neo_api_client hard-pins
+# certifi==2022.12.7 exactly. These two constraints can never both be satisfied in
+# one environment, so growwapi can't be installed alongside Kotak's SDK. The Groww
+# code (core/brokers/groww.py) is still in the repo and degrades gracefully (it'll
+# show "growwapi not installed" if you pick Groww in the UI) — it just needs its
+# own separate deployment/environment if you want to actually use it.
 pandas>=2.0.0
 pyotp>=2.9.0
